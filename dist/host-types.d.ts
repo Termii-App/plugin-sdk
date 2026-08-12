@@ -120,6 +120,13 @@ export interface PluginManifest {
      * 加载失败时本插件跳过加载，跳过原因在设置页与加载日志中可见。
      */
     dependencies?: string[];
+    /**
+     * 可选依赖：本插件不依赖它们也能工作，但缺少时功能降级（由插件
+     * 运行时用 `ctx.plugins.isActive` 自检并自行隐藏/禁用相关功能）。
+     * 宿主只做「尽力序」：可选依赖在候选集内（已安装且已启用且已信任）
+     * 时优先于本插件加载；缺失 / 加载失败**不**跳过本插件。
+     */
+    optionalDependencies?: string[];
     /** 声明式贡献点摘要：用于设置页的展示与信任提示。 */
     contributes?: PluginContributes;
 }
@@ -404,6 +411,12 @@ export interface PluginContext {
          * 不中断调用方）。
          */
         invoke<T>(pluginId: string, service: string, method: string, params?: unknown): Promise<T>;
+        /**
+         * 目标插件当前是否已激活（active）。可选依赖探测：可选依赖缺失时
+         * 插件应自行隐藏 / 禁用相关功能（如 termii-batch 隐藏「片段」来源）。
+         * 同步返回，不触发加载。
+         */
+        isActive(pluginId: string): boolean;
     };
     terminal: {
         getActivePane(): ActivePaneInfo | null;
