@@ -1,0 +1,31 @@
+{
+  "name": "@termii/plugin-sdk",
+  "version": "2.0.0",
+  "description": "Termii plugin SDK: host API types, manifest validation and esbuild packaging tooling for plugin authors (installed via git dependency, not published to npm).",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "termii-plugin-sdk": "bin/termii-plugin-sdk.mjs"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "build": "bash build.sh",
+    "prepare": "bash build.sh"
+  },
+  "files": [
+    "dist",
+    "bin",
+    "shims",
+    "src",
+    "README.md"
+  ],
+  "devDependencies": {
+    "@types/react": "^18.3.12",
+    "esbuild": "^0.25.12",
+    "lucide-react": "^0.468.0",
+    "react": "^18.3.1",
+    "typescript": "^5.6.3"
+  }
+}

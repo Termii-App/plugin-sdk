@@ -1,0 +1,33 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Build dist
+        run: npm run build
+      - name: Smoke — scaffold a minimal plugin bundle
+        run: |
+          mkdir -p /tmp/smoke/src
+          cat > /tmp/smoke/src/main.jsx <<'EOF'
+          import { definePlugin } from "@termii/plugin-sdk";
+          export default definePlugin({
+            manifest: { id: "smoke-test", name: "Smoke", version: "0.0.1" },
+            activate() {},
+          });
+          EOF
+          npx termii-plugin-sdk build /tmp/smoke/src/main.jsx --outfile /tmp/smoke/main.js --minify
+          test -s /tmp/smoke/main.js && echo "✓ bundle produced"
