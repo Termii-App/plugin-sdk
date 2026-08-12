@@ -128,6 +128,13 @@ export interface PluginManifest {
    * `ctx.process.spawn` 未获对应能力 → 明确错误，其余功能可用。
    */
   capabilities?: string[];
+  /**
+   * 前置依赖：本插件激活前必须已加载并激活的插件 id 列表（如
+   * termii-batch 依赖 termii-snippets 的片段服务）。宿主按依赖拓扑序
+   * 加载，保证依赖先于使用方激活；依赖未安装 / 未启用 / 未信任 /
+   * 加载失败时本插件跳过加载，跳过原因在设置页与加载日志中可见。
+   */
+  dependencies?: string[];
   /** 声明式贡献点摘要：用于设置页的展示与信任提示。 */
   contributes?: PluginContributes;
 }
