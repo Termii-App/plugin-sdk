@@ -128,12 +128,6 @@ export interface PluginManifest {
    * `ctx.process.spawn` 未获对应能力 → 明确错误，其余功能可用。
    */
   capabilities?: string[];
-  /**
-   * 官方插件标记。**只在宿主从 bundled 资源目录安装时由 Rust 侧写入**
-   * 第三方插件包伪造无效；官方插件
-   * 自动信任、可禁用、不可卸载。
-   */
-  official?: boolean;
   /** 声明式贡献点摘要：用于设置页的展示与信任提示。 */
   contributes?: PluginContributes;
 }
