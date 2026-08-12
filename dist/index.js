@@ -1,5 +1,7 @@
-// src/index.ts
+// src/host-types.ts
 var SUPPORTED_API_VERSION = 3;
+
+// src/index.ts
 function definePlugin(plugin) {
   return plugin;
 }
