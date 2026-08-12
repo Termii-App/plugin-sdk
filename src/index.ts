@@ -137,6 +137,21 @@ export function validateManifest(
   // 时注入，第三方插件声明无效；validateManifest 的规范化输出里
   // 显式剥离，防止作者误以为可自证官方身份。
 
+  // ---- dependencies（前置依赖）----
+  let dependencies: string[] | undefined;
+  if (obj.dependencies !== undefined) {
+    if (
+      !Array.isArray(obj.dependencies) ||
+      obj.dependencies.some(
+        (d) => typeof d !== "string" || !/^[a-z0-9-]+$/.test(d)
+      )
+    ) {
+      errors.push("dependencies 必须是 kebab-case 插件 id 的字符串数组");
+    } else {
+      dependencies = obj.dependencies as string[];
+    }
+  }
+
   // ---- contributes（浅校验：对象数组即可，字段留宿主 loader 校验）----
   let contributes: PluginContributes | undefined;
   if (obj.contributes !== undefined) {
@@ -177,6 +192,7 @@ export function validateManifest(
   if (typeof obj.author === "string") manifest.author = obj.author;
   if (typeof obj.minAppVersion === "string") manifest.minAppVersion = obj.minAppVersion;
   if (capabilities) manifest.capabilities = capabilities;
+  if (dependencies) manifest.dependencies = dependencies;
   if (sidecar) manifest.sidecar = sidecar;
   if (contributes) manifest.contributes = contributes;
   return { ok: true, manifest };

@@ -89,6 +89,16 @@ function validateManifest(raw) {
       capabilities = obj.capabilities;
     }
   }
+  let dependencies;
+  if (obj.dependencies !== void 0) {
+    if (!Array.isArray(obj.dependencies) || obj.dependencies.some(
+      (d) => typeof d !== "string" || !/^[a-z0-9-]+$/.test(d)
+    )) {
+      errors.push("dependencies \u5FC5\u987B\u662F kebab-case \u63D2\u4EF6 id \u7684\u5B57\u7B26\u4E32\u6570\u7EC4");
+    } else {
+      dependencies = obj.dependencies;
+    }
+  }
   let contributes;
   if (obj.contributes !== void 0) {
     const c = obj.contributes;
@@ -124,6 +134,7 @@ function validateManifest(raw) {
   if (typeof obj.author === "string") manifest.author = obj.author;
   if (typeof obj.minAppVersion === "string") manifest.minAppVersion = obj.minAppVersion;
   if (capabilities) manifest.capabilities = capabilities;
+  if (dependencies) manifest.dependencies = dependencies;
   if (sidecar) manifest.sidecar = sidecar;
   if (contributes) manifest.contributes = contributes;
   return { ok: true, manifest };
