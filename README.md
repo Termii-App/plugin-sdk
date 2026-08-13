@@ -110,4 +110,4 @@ plugin-sdk/
 ## 宿主 API 契约
 
 插件完整可用的 Host API（`ctx.*`）与分发 / 信任模型见
-[Termii 插件开发指南](https://github.com/Termii-App/plugins/blob/main/docs/plugin-dev.md)。
+[Termii 插件开发指南](https://termii.meowdream.cn/docs)。
