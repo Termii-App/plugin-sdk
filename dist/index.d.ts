@@ -1,4 +1,9 @@
 export * from "./host-types";
+export { setHostApi, getHostCtx } from "./runtime/host-ctx";
+export { initPluginI18n, followHostLanguage, type InitPluginI18nOptions, } from "./runtime/i18n";
+export { uid, fuzzyMatch } from "./runtime/utils";
+export { extractSnippetVariables, interpolateSnippet, } from "./runtime/snippet-vars";
+export { ModalFooter } from "./runtime/ModalFooter";
 import type { TermiiPlugin, PluginManifest } from "./host-types";
 /**
  * 原样返回插件对象，仅用于类型收窄与文档锚点：

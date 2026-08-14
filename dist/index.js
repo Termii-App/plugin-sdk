@@ -1,6 +1,104 @@
 // src/host-types.ts
 var SUPPORTED_API_VERSION = 3;
 
+// src/runtime/host-ctx.ts
+var hostCtx = null;
+function setHostApi(ctx) {
+  hostCtx = ctx;
+}
+function getHostCtx() {
+  if (!hostCtx) {
+    throw new Error("\u5BBF\u4E3B\u53E5\u67C4\u672A\u521D\u59CB\u5316\uFF1A\u63D2\u4EF6 activate \u65F6\u5FC5\u987B\u8C03\u7528 setHostApi(ctx)");
+  }
+  return hostCtx;
+}
+
+// src/runtime/i18n.ts
+import i18next from "i18next";
+import { initReactI18next } from "react-i18next";
+function initPluginI18n(options) {
+  const lng = typeof navigator !== "undefined" && /^zh/i.test(navigator.language) ? "zh-CN" : "en-US";
+  void i18next.use(initReactI18next).init({
+    resources: options.resources,
+    lng,
+    fallbackLng: options.fallbackLng ?? "en-US",
+    ns: options.ns,
+    defaultNS: options.defaultNS ?? "views",
+    interpolation: { escapeValue: false }
+  });
+  return i18next;
+}
+function followHostLanguage(ctx, i18n = i18next) {
+  const hostLng = ctx.i18n.getLanguage();
+  if (hostLng && i18n.language !== hostLng) void i18n.changeLanguage(hostLng);
+  return ctx.i18n.onLanguageChanged((lng) => {
+    if (i18n.language !== lng) void i18n.changeLanguage(lng);
+  });
+}
+
+// src/runtime/utils.ts
+function uid() {
+  return (Date.now().toString(36) + Math.random().toString(36).slice(2, 8)).toLowerCase();
+}
+function fuzzyMatch(query, target) {
+  const q = query.trim().toLowerCase();
+  if (!q) return true;
+  const t = target.toLowerCase();
+  let ti = 0;
+  for (let qi = 0; qi < q.length; qi++) {
+    const ch = q[qi];
+    const idx = t.indexOf(ch, ti);
+    if (idx === -1) return false;
+    ti = idx + 1;
+  }
+  return true;
+}
+
+// src/runtime/snippet-vars.ts
+var VARIABLE_PATTERN = /\{\{\s*([A-Za-z_][A-Za-z0-9_.-]*)\s*\}\}/g;
+function extractSnippetVariables(command) {
+  const variables = [];
+  const seen = /* @__PURE__ */ new Set();
+  command.replace(VARIABLE_PATTERN, (match, name) => {
+    if (!seen.has(name)) {
+      seen.add(name);
+      variables.push(name);
+    }
+    return match;
+  });
+  return variables;
+}
+function interpolateSnippet(command, values) {
+  return command.replace(
+    VARIABLE_PATTERN,
+    (match, name) => Object.prototype.hasOwnProperty.call(values, name) ? values[name] : match
+  );
+}
+
+// src/runtime/ModalFooter.tsx
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState
+} from "react";
+import { createPortal } from "react-dom";
+var noopContext = createContext(null);
+var sharedContext = typeof window === "undefined" ? null : window.__termii?.shared?.ModalFooterContext ?? null;
+function ModalFooter({ children }) {
+  const fromContext = useContext(sharedContext ?? noopContext);
+  const [probed, setProbed] = useState(null);
+  useEffect(() => {
+    if (sharedContext) return;
+    const masks = document.querySelectorAll(".dlg-mask");
+    const mask = masks.length > 0 ? masks[masks.length - 1] : null;
+    setProbed(mask?.querySelector(".dlg-footer") ?? null);
+  }, []);
+  const host = sharedContext ? fromContext : probed;
+  if (!host) return null;
+  return createPortal(children, host);
+}
+
 // src/index.ts
 function definePlugin(plugin) {
   return plugin;
@@ -140,7 +238,16 @@ function validateManifest(raw) {
   return { ok: true, manifest };
 }
 export {
+  ModalFooter,
   SUPPORTED_API_VERSION,
   definePlugin,
+  extractSnippetVariables,
+  followHostLanguage,
+  fuzzyMatch,
+  getHostCtx,
+  initPluginI18n,
+  interpolateSnippet,
+  setHostApi,
+  uid,
   validateManifest
 };

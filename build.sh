@@ -19,14 +19,19 @@ fi
 
 mkdir -p dist
 
-# 运行时代码（definePlugin / validateManifest）零运行时依赖：react / lucide-react
-# 只是类型 import，esbuild 直接擦除；--external 是双保险，防止未来引入运行时 import。
+# 运行时代码：definePlugin / validateManifest 零依赖；共享运行时段
+# （runtime/）按需 import react / react-dom / i18next / react-i18next ——
+# 消费方（插件 bundle 经 CLI alias 到 shims / 安装根 node_modules，宿主
+# app 自带这些包）都已提供，dist 产物一律 external，不打进包。
 "$ESBUILD" src/index.ts \
   --bundle \
   --format=esm \
   --outfile=dist/index.js \
   --external:react \
-  --external:lucide-react
+  --external:react-dom \
+  --external:lucide-react \
+  --external:i18next \
+  --external:react-i18next
 
 # 声明文件：所有导出类型 + 函数签名。
 # （tsconfig.json 是 noEmit 的 typecheck 配置，此处用 CLI 参数覆盖以产出 d.ts。）

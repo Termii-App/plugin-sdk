@@ -5,6 +5,11 @@ Termii 插件系统 SDK（独立仓库，**不发 npm**，经 git 依赖安装�
 - 宿主 API 类型面（`PluginContext` / `PluginManifest` / 各 Contribution / 隧道与片段类型）
 - `definePlugin()` —— 原样返回插件对象，提供类型收窄与文档锚点
 - `validateManifest()` —— 清单校验（手写，**零依赖**，不引入 zod 等）
+- 共享运行时（v2.1，官方插件原各自拷贝的公共层收编于此）：
+  - `setHostApi()` / `getHostCtx()` —— 宿主句柄单例（activate 时注入，插件各层共享；随每个 bundle 各带一份，作用域即本插件）
+  - `initPluginI18n()` / `followHostLanguage()` —— 插件自身 i18next 实例的初始化与宿主语言跟随（实例打进插件 bundle，与宿主 i18next 互不可见）
+  - `uid()` / `fuzzyMatch()` / `extractSnippetVariables()` / `interpolateSnippet()` —— 与宿主同源的公共纯函数
+  - `<ModalFooter>` —— 弹窗 footer 槽组件：优先消费宿主 `window.__termii.shared.ModalFooterContext`（新宿主，语义与宿主组件一致），老宿主未暴露时回退 DOM 探测（`dlg-*` 骨架契约）
 - `termii-plugin-sdk` —— esbuild 打包脚手架（单文件 ESM 产物，共享宿主 React / lucide）
 
 ## 安装
@@ -31,10 +36,10 @@ import { definePlugin, validateManifest, type PluginContext } from "@termii/plug
 
 ## 类型同步（宿主私有，维护者须知）
 
-本包的类型与宿主内部 `src/lib/plugins/types.ts` **手工同步**（未建源码生成管线）。
-理由：类型量小、变更低频；apiVersion 面冻结后同步成本低。宿主类型一旦变更
-（新增 / 改名 / 改签名），**必须同步更新 `src/index.ts`** —— 宿主侧类型改动
-review 时顺带比对 `src/index.ts`，两者不应分叉。
+`src/host-types.ts` **自动生成，勿手改**：Termii 主仓库 push main 时
+sync-sdk-types CD 运行 `scripts/gen-sdk-types.mjs`，从宿主
+`src/lib/plugins/types.ts` + `src/lib/types.ts` 生成并推送到本仓库。
+宿主类型变更无需在本仓库手工跟进。
 
 ## 在插件里用
 
@@ -73,6 +78,38 @@ if (result.ok) {
 npx termii-plugin-sdk build src/main.jsx --outfile main.js --minify
 ```
 
+共享运行时的典型用法（i18n 初始化 + activate 注入 + 语言跟随）：
+
+```ts
+import {
+  definePlugin,
+  setHostApi,
+  initPluginI18n,
+  followHostLanguage,
+  ModalFooter,
+} from "@termii/plugin-sdk";
+import enUS from "./i18n/en-US.json";
+import zhCN from "./i18n/zh-CN.json";
+
+const i18n = initPluginI18n({
+  resources: { "en-US": enUS, "zh-CN": zhCN },
+  ns: ["views", "common"],
+});
+
+export default definePlugin({
+  manifest: { /* … */ },
+  activate(ctx) {
+    setHostApi(ctx);
+    const unsubscribeLng = followHostLanguage(ctx, i18n);
+    // ……
+  },
+});
+```
+
+（`initPluginI18n` / `followHostLanguage` 需要 i18next + react-i18next
+随插件 bundle 打包——CLI 从安装根 node_modules 解析，插件项目装上即可；
+不使用这两个帮手的插件不需要 i18n 依赖。）
+
 - 默认把 `react` / `react/jsx-runtime` / `lucide-react` alias 到本包 `shims/`
   （运行时从 `window.__termii.shared` 取宿主共享实例）；
 - 默认还把 `@termii/plugin-sdk` alias 到本包 `src/index.ts`（definePlugin /
@@ -104,7 +141,10 @@ plugin-sdk/
 ├── bin/termii-plugin-sdk.mjs   # 打包脚手架 CLI（esbuild JS API）
 ├── shims/                # react / react-jsx-runtime / lucide-react 宿主共享 shim
 ├── dist/                 # 构建产物（提交进仓库，git 安装即用）
-└── src/index.ts          # 全部类型 + definePlugin + validateManifest（手工同步）
+├── src/
+│   ├── index.ts          # 装配：类型 re-export + definePlugin / validateManifest
+│   ├── host-types.ts     # 宿主 API 类型面（自动生成，勿手改）
+│   └── runtime/          # 共享运行时（host-ctx / i18n / utils / snippet-vars / ModalFooter）
 ```
 
 ## 宿主 API 契约

@@ -1,8 +1,8 @@
 // ReactDOM（react-dom 入口）由宿主共享（window.__termii.shared.ReactDOM），
 // 插件打包时通过 --alias:react-dom=./shims/react-dom.js 指向本文件。
 //
-// 目前只转发 createPortal —— ModalFooter / ContextMenu 两个宿主组件副本
-// （plugins/official/termii-docker/src/views/lib/）需要把内容 portal 进
+// 目前只转发 createPortal —— SDK 的 ModalFooter（runtime/ModalFooter.tsx）
+// 与 docker 插件的 ContextMenu 副本需要把内容 portal 进
 // .dlg-footer / document.body；React 18 的 createPortal 是纯元素构造
 // （$$typeof = Symbol.for("react.portal")，Symbol.for 全局唯一），
 // 宿主 renderer 能直接消化插件侧构造的 portal 元素，无需重复打包 react-dom。

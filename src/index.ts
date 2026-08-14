@@ -5,9 +5,27 @@
 // src/lib/types.ts 生成，经 sync-sdk-types CD（main push）自动推送到本仓库。
 // 本文件只保留 SDK 运行时工具与装配。
 //
-// 本包不 import 宿主任何源码，独立可编译；react / lucide-react 仅作
-// 类型依赖（import type，在 host-types.ts 内），运行时无依赖。
+// 本包不 import 宿主任何源码，独立可编译。类型段（host-types.ts）零
+// 运行时依赖；共享运行时段（runtime/，v2.1 起收编官方插件原各自拷贝的
+// 公共层）按需 import react / react-dom / i18next / react-i18next ——
+// 插件打包时 CLI 把 react 系 alias 到 shims（宿主共享实例）、i18n 系从
+// 安装根 node_modules 打进 bundle；dist 产物对它们一律 external（见
+// build.sh）。
 export * from "./host-types";
+
+// ---- 共享运行时（官方插件原各自拷贝的公共层，v2.1 起收编）----
+export { setHostApi, getHostCtx } from "./runtime/host-ctx";
+export {
+  initPluginI18n,
+  followHostLanguage,
+  type InitPluginI18nOptions,
+} from "./runtime/i18n";
+export { uid, fuzzyMatch } from "./runtime/utils";
+export {
+  extractSnippetVariables,
+  interpolateSnippet,
+} from "./runtime/snippet-vars";
+export { ModalFooter } from "./runtime/ModalFooter";
 
 // 工具段签名引用的类型显式绑定（export * 只转发、不进入本文件作用域）。
 import type { TermiiPlugin, PluginManifest, PluginContributes } from "./host-types";
