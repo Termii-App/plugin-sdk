@@ -106,9 +106,10 @@ export default definePlugin({
 });
 ```
 
-（`initPluginI18n` / `followHostLanguage` 需要 i18next + react-i18next
-随插件 bundle 打包——CLI 从安装根 node_modules 解析，插件项目装上即可；
-不使用这两个帮手的插件不需要 i18n 依赖。）
+（SDK 主入口当前会一并引用共享 i18n 运行时，因此插件项目构建前需要
+安装 `i18next` + `react-i18next` 供 CLI 解析——即使插件不使用
+`initPluginI18n` 等帮手也要装上，依赖会被打进 bundle。模板项目已在
+`package.json` 内置。）
 
 - 默认把 `react` / `react/jsx-runtime` / `lucide-react` alias 到本包 `shims/`
   （运行时从 `window.__termii.shared` 取宿主共享实例）；
