@@ -65,7 +65,7 @@ export interface RemoteForwardProbe {
   /** True when sshd will honour `bindHost` as configured. */
   bindHostSupported: boolean;
   limitationMessage: string;
-  /** True when `sudo -n true` succeeded — auto-fix won't hang on a password prompt. */
+  /** True when the remote user is root or `sudo -n true` succeeded — auto-fix won't hang on a password prompt. */
   canAutoFix: boolean;
 }
 // ---- 后端终端会话：attach / replay / chunk ----
