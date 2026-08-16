@@ -5,7 +5,7 @@ Termii 插件系统 SDK（独立仓库，**不发 npm**，经 git 依赖安装�
 - 宿主 API 类型面（`PluginContext` / `PluginManifest` / 各 Contribution / 隧道与片段类型）
 - `definePlugin()` —— 原样返回插件对象，提供类型收窄与文档锚点
 - `validateManifest()` —— 清单校验（手写，**零依赖**，不引入 zod 等）
-- 共享运行时（v2.1，官方插件原各自拷贝的公共层收编于此）：
+- 共享运行时（v2.2，官方插件原各自拷贝的公共层收编于此）：
   - `setHostApi()` / `getHostCtx()` —— 宿主句柄单例（activate 时注入，插件各层共享；随每个 bundle 各带一份，作用域即本插件）
   - `initPluginI18n()` / `followHostLanguage()` —— 插件自身 i18next 实例的初始化与宿主语言跟随（实例打进插件 bundle，与宿主 i18next 互不可见）
   - `uid()` / `fuzzyMatch()` / `extractSnippetVariables()` / `interpolateSnippet()` —— 与宿主同源的公共纯函数

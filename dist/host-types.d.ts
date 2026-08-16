@@ -272,6 +272,22 @@ export interface SidecarApi {
     call<T = unknown>(method: string, params?: unknown, timeoutMs?: number): Promise<T>;
 }
 /**
+ * 配置快照 Api（L1 process 门禁）。
+ * 导出/导入的是宿主完整配置 JSON（hosts/settings/pluginSettings/layouts），
+ * 供配置同步类插件使用；导入会立即应用到当前运行中的 store 并落盘。
+ */
+export interface ConfigApi {
+    /** 导出当前完整配置快照（JSON 字符串）。 */
+    export(): Promise<string>;
+    /** 导入配置快照并应用到当前运行中的 store。 */
+    import(json: string): Promise<void>;
+}
+/** 应用路径投影。 */
+export interface PathsApi {
+    /** 应用数据目录绝对路径（config.json 与 plugins/ 所在目录）。 */
+    appDataDir(): Promise<string>;
+}
+/**
  * 流式进程输出块。`stream` 区分
  * stdout / stderr —— 官方 Docker 插件（plugins/official/termii-docker/）
  * 的构建进度在 stderr，解析必须分流。
@@ -516,6 +532,10 @@ export interface PluginContext {
         pickFile(opts?: {
             extensions?: string[];
         }): Promise<string | null>;
+        /**
+         * 弹「选择目录」对话框；取消返回 null。用于让用户指定本地同步目录。
+         */
+        pickDirectory(): Promise<string | null>;
     };
     /** 受限文件系统投影。 */
     fs: {
@@ -534,6 +554,15 @@ export interface PluginContext {
         set(id: string, secret: string): Promise<void>;
         /** 删除 secret；不存在时静默成功。 */
         delete(id: string): Promise<void>;
+        /**
+         * 列出全部 vault secret id。需要 L1 `process` 能力（与 config /
+         * vault 批量导出同一把信任锁）。
+         */
+        list(): Promise<string[]>;
+        /** 导出全部 vault 条目。需要 L1 `process` 能力。 */
+        export(): Promise<Record<string, string>>;
+        /** 整体替换 vault 内容。需要 L1 `process` 能力。 */
+        import(entries: Record<string, string>): Promise<void>;
     };
     /**
      * 文件传输投影（同步形态）：Promise 在传输真正完成/失败后才 settle，
@@ -561,6 +590,10 @@ export interface PluginContext {
      * 未获用户二重确认 / 当前平台无对应二进制 → reject 明确错误。
      */
     sidecar: SidecarApi;
+    /** 配置快照导入/导出（L1 process 门禁）。 */
+    config: ConfigApi;
+    /** 应用路径投影。 */
+    paths: PathsApi;
     /** 持久化 KV，落在 config.json 的 settings.pluginSettings.<pluginId>。 */
     storage: {
         get<T>(key: string, fallback: T): T;

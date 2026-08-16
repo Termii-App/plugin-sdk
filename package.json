@@ -1,6 +1,6 @@
 {
   "name": "@termii/plugin-sdk",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "Termii plugin SDK: host API types, manifest validation and esbuild packaging tooling for plugin authors (installed via git dependency, not published to npm).",
   "private": true,
   "type": "module",
