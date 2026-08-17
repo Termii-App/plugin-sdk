@@ -65,7 +65,7 @@ export interface OutputChunk {
     seq: number;
     data: string;
 }
-export declare const SUPPORTED_API_VERSION = 3;
+export declare const SUPPORTED_API_VERSION = 4;
 /** 注册即返回的清理函数；插件去激活时统一回放。 */
 export type Disposer = () => void;
 /** toast 进度条载荷（与宿主 ToastProgress 同形）。total 为 0 时宿主渲染
@@ -335,7 +335,7 @@ export interface SessionsApi {
 }
 export interface PluginContext {
     readonly pluginId: string;
-    /** 宿主支持的插件 API 版本（当前为 SUPPORTED_API_VERSION = 3）。 */
+    /** 宿主支持的插件 API 版本（当前为 SUPPORTED_API_VERSION = 4）。 */
     readonly apiVersion: number;
     ui: {
         registerView(view: ViewContribution): Disposer;

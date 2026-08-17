@@ -1,5 +1,5 @@
 // src/host-types.ts
-var SUPPORTED_API_VERSION = 3;
+var SUPPORTED_API_VERSION = 4;
 
 // src/runtime/host-ctx.ts
 var hostCtx = null;

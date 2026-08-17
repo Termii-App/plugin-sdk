@@ -76,7 +76,7 @@ export interface OutputChunk {
 }
 
 // ---- 宿主插件系统核心类型（src/lib/plugins/types.ts）----
-export const SUPPORTED_API_VERSION = 3;
+export const SUPPORTED_API_VERSION = 4;
 
 /** 注册即返回的清理函数；插件去激活时统一回放。 */
 export type Disposer = () => void;
@@ -350,7 +350,7 @@ export interface SessionsApi {
 
 export interface PluginContext {
   readonly pluginId: string;
-  /** 宿主支持的插件 API 版本（当前为 SUPPORTED_API_VERSION = 3）。 */
+  /** 宿主支持的插件 API 版本（当前为 SUPPORTED_API_VERSION = 4）。 */
   readonly apiVersion: number;
 
   ui: {
