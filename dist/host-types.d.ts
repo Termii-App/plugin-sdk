@@ -598,6 +598,12 @@ export interface PluginContext {
     storage: {
         get<T>(key: string, fallback: T): T;
         set(key: string, value: unknown): void;
+        /**
+         * 本插件 KV 变更通知：`storage.set` 与整份配置导入
+         * （`config.import`）都会触发。用于使快照缓存（docker /
+         * tunnels 等 `useSyncExternalStore` 语义）失效。
+         */
+        onChanged(cb: () => void): Disposer;
     };
     events: {
         /**
@@ -623,4 +629,11 @@ export interface TermiiPlugin {
     manifest: PluginManifest;
     activate(ctx: PluginContext): void | Promise<void>;
     deactivate?(): void;
+    /**
+     * 配置重载通知（v4+）：宿主经 `ctx.config.import`（同 termii-sync 的
+     * pull / merge）完成后调用，让插件丢弃因 `settings.pluginSettings` /
+     * 主机快照被整体替换而失效的缓存，并用同一 ctx 重新读取。
+     * 可选：不实现则宿主仅跳过。异常由宿主隔离，不影响其他插件。
+     */
+    onConfigReload?(ctx: PluginContext): void | Promise<void>;
 }
