@@ -152,3 +152,28 @@ plugin-sdk/
 
 插件完整可用的 Host API（`ctx.*`）与分发 / 信任模型见
 [Termii 插件开发指南](https://termii.meowdream.cn/docs)。
+
+## 样式契约（视觉由宿主决定）
+
+插件视图 / 设置分区 / 弹窗 body 渲染在宿主 DOM 内，宿主设计系统
+（design-system.css）**必然已加载**，插件可直接依赖：
+
+- **Token**：颜色（`--bg` / `--bg-elev` / `--fg` / `--accent` / `--green`
+  / `--amber` / `--red` …）、圆角（`--radius*`）、字号阶梯（`--fs-*`）、
+  动效（`--motion-*`）、留白（`--t-space-*`）、磨砂（`--glass-*`）。主题
+  （暗色 / 亮色 / 午夜黑 / 暖纸）与用户自定义强调色由宿主自动切换，
+  插件不得写死颜色。
+- **共享控件词汇类**：`.btn`（+ `-primary/-ghost/-danger/-sm`）、
+  `.icon-btn`、`.input` / `.textarea` / `.select` / `.field` / `.search-box`、
+  `.t-check` / `.t-radio` / `.t-switch` / `.t-slider` / `.t-seg`、
+  `.aero-card`（+ head/title/body/footer）与 `.aero-panel`、`.t-toolbar`、
+  `.t-tabs`、`.t-badge` / `.status-dot`、`.t-progress` / `.t-spinner`、
+  `.t-list-row`、`.empty-state`、`.t-tip`。
+- **弹窗骨架**：走 `ctx.ui.modal.openForm` / `confirm` / `alert`，
+  `.dlg-mask / .dlg-card / .dlg-header / .dlg-body / .dlg-footer` 与
+  `.ctx-menu`、`.t-toast` 由宿主提供，插件只填内容。
+
+插件 `main.css` **只写自有前缀的布局 / 业务样式**（如 `.myplugin-row`），
+**禁止拷贝宿主样式子集**（Settings.css / global.css / design-system.css
+的任何段落）——拷贝必然随宿主演进漂移。若依赖较新的宿主词汇，用
+`plugin.json` 的 `minAppVersion` 声明所需宿主版本下限。
