@@ -73,6 +73,8 @@ export interface RemoteForwardProbe {
 export interface OutputChunk {
   seq: number;
   data: string;
+  /** Backend receive time (ms), also retained in replay snapshots. */
+  timestamp?: number;
 }
 
 // ---- 宿主插件系统核心类型（src/lib/plugins/types.ts）----
@@ -353,6 +355,15 @@ export interface PluginContext {
   /** 宿主支持的插件 API 版本（当前为 SUPPORTED_API_VERSION = 4）。 */
   readonly apiVersion: number;
 
+  /**
+   * 样式契约（视图 / 设置分区 / 弹窗 body 通用）：插件渲染在宿主 DOM，
+   * token（--bg / --fg / --accent / --fs-* / --motion-* / --glass-* …）
+   * 与共享控件词汇类（.btn / .icon-btn / .input / .select / .t-switch /
+   * .aero-card / .t-toolbar / .t-badge / .dlg-* / .empty-state …）由宿主
+   * design-system.css 保证提供——插件 main.css 只写自有前缀布局样式，
+   * 禁止拷贝宿主样式子集，视觉一律随宿主演进。依赖较新词汇时用
+   * manifest.minAppVersion 声明。
+   */
   ui: {
     registerView(view: ViewContribution): Disposer;
     registerCommand(cmd: CommandContribution): Disposer;
